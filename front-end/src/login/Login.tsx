@@ -6,10 +6,12 @@ export default function Login() {
 	return (
 		<div className="dark flex w-full h-screen justify-center items-center ">
 			<div className="border border-1 rounded-md">
-				<Button className="bg-slate-200 flex justify-between gap-5 shadow-lg">
-					<Icon icon="flat-color-icons:google" />
-					<Link to="home/">Sign In with Google</Link>
-				</Button>
+				<Link to="home/">
+					<Button className="bg-slate-200 flex justify-between gap-5 shadow-lg">
+						<Icon icon="flat-color-icons:google" />
+						Sign In with Google
+					</Button>
+				</Link>
 			</div>
 		</div>
 	);
