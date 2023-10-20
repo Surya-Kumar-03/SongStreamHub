@@ -1,21 +1,11 @@
 import * as React from 'react';
 
 import {Button} from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
-import {Input} from '@/components/ui/input';
-import {Label} from '@/components/ui/label';
+import {Card, CardContent, CardFooter} from '@/components/ui/card';
 import poster from '@/assets/poster.webp';
 import Image from '@/components/ui/image';
 import {Icon} from '@iconify/react';
 import PlayButton from '@/components/ui/platButton';
-import Theme from '@/components/ui/theme';
 
 export function MusicCard() {
 	const [like, setLike] = React.useState(false);
@@ -36,15 +26,15 @@ export function MusicCard() {
 	};
 	return (
 		<Card className="w-[350px] hover:bg-foreground/10">
-			<CardContent className="p-4 relative h-80 -z-0">
+			<CardContent className="p-4 relative h-80">
 				<Image
 					src={poster}
 					className="w-full h-full bg-cover bg-center  bg-black bg-blend-overlay"
 				/>
 				<Button
 					onClick={playSong}
-					variant="secondary"
-					className="absolute cursor-pointer  bottom-5 right-10 hover:scale-110 transition-all rounded-full h-10 w-10">
+					variant="ghost"
+					className="absolute cursor-pointer bg-green-600 hover:bg-green-600  bottom-5 right-10 hover:scale-110 transition-all rounded-full h-10 w-10">
 					<PlayButton play={playing} />
 				</Button>
 			</CardContent>
