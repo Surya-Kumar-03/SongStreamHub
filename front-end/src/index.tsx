@@ -1,3 +1,4 @@
+import {NavBar, Menu} from './navBar/header';
 import Home from './home/Home';
 import Login from './login/Login';
 import {createBrowserRouter, RouterProvider} from 'react-router-dom';
@@ -7,18 +8,32 @@ import client from './graphqlConfig';
 const router = createBrowserRouter([
 	{
 		path: '/',
-		element: <Login />,
+		element: (
+			<>
+				<NavBar />
+				<Login />
+			</>
+		),
 	},
 	{
 		path: 'home/',
-		element: <Home></Home>,
+		element: (
+			<>
+				<Menu />
+				<Home></Home>
+			</>
+		),
 	},
 ]);
 
 export default function Index() {
 	return (
 		<ApolloProvider client={client}>
-			<RouterProvider router={router} />
+			<div className="flex w-full h-full">
+				<div className="container">
+					<RouterProvider router={router} />
+				</div>
+			</div>
 		</ApolloProvider>
 	);
 }
