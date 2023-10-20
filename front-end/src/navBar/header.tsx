@@ -10,7 +10,10 @@ import {
 	Menubar,
 	MenubarContent,
 	MenubarItem,
+	MenubarLabel,
 	MenubarMenu,
+	MenubarRadioGroup,
+	MenubarRadioItem,
 	MenubarSeparator,
 	MenubarShortcut,
 	MenubarTrigger,
@@ -20,6 +23,8 @@ import {useTheme} from '../components/theme-provider';
 import React from 'react';
 import {Button} from '../components/ui/button';
 import SocialsLinks from './socials_link';
+import {TrashIcon} from '@radix-ui/react-icons';
+import {Link} from 'react-router-dom';
 
 function ThemeChanger() {
 	const {setTheme} = useTheme();
@@ -74,14 +79,51 @@ export function Menu() {
 									About Music <MenubarShortcut>⌘ D</MenubarShortcut>
 								</MenubarItem>
 								<MenubarItem>New Window</MenubarItem>
-								<MenubarSeparator />
-								<MenubarSeparator />
 							</MenubarContent>
 						</MenubarMenu>
+
 						<MenubarMenu>
 							<MenubarTrigger>
 								<SocialsLinks />
 							</MenubarTrigger>
+						</MenubarMenu>
+
+						<MenubarMenu>
+							<MenubarTrigger className="hidden md:block">Account</MenubarTrigger>
+							<MenubarContent forceMount>
+								<MenubarLabel inset>Switch Account</MenubarLabel>
+								<MenubarSeparator />
+								<MenubarRadioGroup value="benoit">
+									<MenubarRadioItem value="andy">
+										<div className="flex justify-between w-full">
+											<div>Andy</div>
+											<div className="rounded-full text-muted-foreground hover:text-foreground cursor-pointer hover:bg-primary-foreground p-1 flex justify-center items-center">
+												<TrashIcon />
+											</div>
+										</div>
+									</MenubarRadioItem>
+									<MenubarRadioItem value="benoit">
+										<div className="flex justify-between w-full">
+											<div>Benoit</div>
+											<div className="rounded-full text-muted-foreground hover:text-foreground cursor-pointer hover:bg-primary-foreground p-1 flex justify-center items-center">
+												<TrashIcon />
+											</div>
+										</div>
+									</MenubarRadioItem>
+									<MenubarRadioItem value="Luis">
+										<div className="flex justify-between w-full">
+											<div>Luis</div>
+											<div className="rounded-full text-muted-foreground hover:text-foreground cursor-pointer hover:bg-primary-foreground p-1 flex justify-center items-center">
+												<TrashIcon />
+											</div>
+										</div>
+									</MenubarRadioItem>
+								</MenubarRadioGroup>
+								<MenubarSeparator />
+								<Link to="/">
+									<MenubarItem inset>Add Account...</MenubarItem>
+								</Link>
+							</MenubarContent>
 						</MenubarMenu>
 					</div>
 					<div>
