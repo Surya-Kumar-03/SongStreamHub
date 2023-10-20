@@ -1,20 +1,16 @@
-const Query = `
+const typeDefs = `
   type Query {
     getUser(uid: Int!): User 
     getSong(id: Int!): Song
   }
-`;
 
-const UserType = `
   type User {
     uid: Int!
     username: String!
     email: String!
     likedSongs: [String]
   }
-`;
 
-const SongType = `
   scalar Date
   type Song {
     id: Int!
@@ -29,7 +25,21 @@ const SongType = `
     likes: Int
     genre: String
   }
+
+  type Mutation {
+    authenticateWithGoogle: String
+  }
 `;
 
-const typeDefs = [Query, UserType, SongType];
-module.exports = { typeDefs };
+const resolvers = {
+	Mutation: {
+		authenticateWithGoogle: {
+			resolve: () => {
+				console.log('Recieved');
+				return 'Google authentication successful';
+			},
+		},
+	},
+};
+
+module.exports = {typeDefs, resolvers};
