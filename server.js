@@ -15,6 +15,12 @@ const {connectToDatabase} = require('./back-end/config/database');
 // Type Definitions
 const {typeDefs, resolvers} = require('./back-end/graphql');
 
+// User Model
+const User = require('./back-end/models/userModel');
+
+// JWT Modules
+const {validateToken} = require('./back-end/jwt');
+
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -28,7 +34,6 @@ passport.use(
 			callbackURL: '/auth/google/callback',
 		},
 		(accessToken, refreshToken, profile, done) => {
-			console.log(accessToken);
 			return done(null, profile);
 		}
 	)
@@ -44,21 +49,48 @@ async function startServer() {
 		await server.start();
 
 		if (dbConnected) {
-			app.use('/', expressMiddleware(server));
+			app.use('/graphql', expressMiddleware(server));
 
-			// app.get(
-			// 	'/auth/google',
-			// 	passport.authenticate('google', {scope: ['profile', 'email']})
-			// );
+			app.get(
+				'/auth/google',
+				passport.authenticate('google', {scope: ['profile', 'email']})
+			);
 
 			app.get(
 				'/auth/google/callback',
 				passport.authenticate('google', {session: false}),
-				(req, res) => {
-					const user = req.user; // Authenticated user data
-					console.log(user);
+				async (req, res) => {
+					try {
+						const {id, displayName, emails, photos} = req.user;
 
-					// res.redirect(`/graphql?token=${token}`);
+						const googleId = id;
+						const name = displayName;
+						const email = emails[0].value;
+						const profilePicture = photos[0].value;
+
+						let user = await User.findOne({googleId});
+
+						if (!user) {
+							user = new User({googleId, name, email, profilePicture});
+							await user.save();
+						}
+
+						const token = jwt.sign(
+							{
+								userId: user._id,
+								name: user.name,
+								email: user.email,
+								profilePicture: user.profilePicture,
+							},
+							process.env.JWT_SECRET,
+							{expiresIn: '7d'}
+						);
+
+						res.redirect(`${process.env.FRONTEND_URL}/home?token=${token}`);
+					} catch (error) {
+						console.error('Error handling Google Sign-In:', error);
+						res.status(500).json({error: 'Server Error'});
+					}
 				}
 			);
 

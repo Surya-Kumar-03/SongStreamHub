@@ -25,21 +25,8 @@ const typeDefs = `
     likes: Int
     genre: String
   }
-
-  type Mutation {
-    authenticateWithGoogle: String
-  }
 `;
 
-const resolvers = {
-	Mutation: {
-		authenticateWithGoogle: {
-			resolve: () => {
-				console.log('Recieved');
-				return 'Google authentication successful';
-			},
-		},
-	},
-};
+const resolvers = {};
 
 module.exports = {typeDefs, resolvers};
