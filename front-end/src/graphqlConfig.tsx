@@ -2,15 +2,13 @@ import {ApolloClient, InMemoryCache, createHttpLink} from '@apollo/client';
 import {setContext} from '@apollo/client/link/context';
 
 const httpLink = createHttpLink({
-	uri: 'http://localhost:8000',
+	uri: import.meta.env.VITE_BASE_URL + '/graphql',
 });
 
 const authLink = setContext((_, {headers}) => {
-	const token = 'AUTH_TOKEN_HERE';
 	return {
 		headers: {
-			...headers,
-			authorization: token ? `Bearer ${token}` : '',
+			'Content-Type': 'application/json',
 		},
 	};
 });

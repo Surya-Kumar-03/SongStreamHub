@@ -44,23 +44,26 @@ async function startServer() {
 		await server.start();
 
 		if (dbConnected) {
-			app.use('/', expressMiddleware(server));
+			app.use('/graphql', expressMiddleware(server));
 
-			// app.get(
-			// 	'/auth/google',
-			// 	passport.authenticate('google', {scope: ['profile', 'email']})
-			// );
+			app.get(
+				'/auth/google',
+				passport.authenticate('google', {scope: ['profile', 'email']})
+			);
 
 			app.get(
 				'/auth/google/callback',
 				passport.authenticate('google', {session: false}),
 				(req, res) => {
-					const user = req.user; // Authenticated user data
+					const user = req.user;
 					console.log(user);
-
-					// res.redirect(`/graphql?token=${token}`);
+					res.redirect('/home');
 				}
 			);
+
+			app.get('/home', (req, res) => {
+				res.send('Hello, world');
+			});
 
 			const PORT = process.env.PORT || 8000;
 			app.listen(PORT, () => {
