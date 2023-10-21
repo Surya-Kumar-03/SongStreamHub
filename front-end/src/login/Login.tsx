@@ -2,8 +2,17 @@ import {Button} from '@/components/ui/button';
 import {Icon} from '@iconify/react';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Label} from '@/components/ui/label';
+import {isTokenExpired, extractToken} from '@/jwt';
+import {useEffect} from 'react';
 
 export default function Login() {
+	useEffect(() => {
+		const jwtToken = extractToken();
+		if (jwtToken !== null && !isTokenExpired(jwtToken)) {
+			window.location.href = '/home';
+		}
+	}, []);
+
 	return (
 		<div className="flex w-full h-screen justify-center items-center flex-col gap-10">
 			<Card className="w-[350px] flex flex-col items-center">
