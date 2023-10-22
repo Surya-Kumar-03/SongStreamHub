@@ -18,7 +18,7 @@ const {typeDefs, resolvers} = require('./back-end/graphql');
 // User Model
 const User = require('./back-end/models/userModel');
 
-// JWT Modules
+// JWT Validators
 const {validateToken} = require('./back-end/jwt');
 
 const app = express();
@@ -44,12 +44,39 @@ app.use(passport.initialize());
 async function startServer() {
 	try {
 		const dbConnected = await connectToDatabase();
-		const server = new ApolloServer({typeDefs, resolvers});
+		const server = new ApolloServer({
+			typeDefs,
+			resolvers,
+		});
 
 		await server.start();
 
 		if (dbConnected) {
-			app.use('/graphql', expressMiddleware(server));
+			app.get('/', (req, res) => {
+				res.send('Hello from the backend server!');
+			});
+
+			app.use(
+				'/graphql',
+				expressMiddleware(server, {
+					context: ({req, res}) => {
+						const authorizationHeader = req.headers.authorization;
+						if (authorizationHeader) {
+							const token = authorizationHeader.replace('Bearer ', '');
+							const {userId, isValid} = validateToken(token);
+							return {
+								userId: userId,
+								isValid: isValid,
+							};
+						} else {
+							return {
+								userId: null,
+								isValid: false,
+							};
+						}
+					},
+				})
+			);
 
 			app.get(
 				'/auth/google',
