@@ -2,16 +2,20 @@ const jwt = require('jsonwebtoken');
 
 const validateToken = (token) => {
 	try {
+		if (token === null) {
+			return {userId: null, isValid: false};
+		}
+
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
 		const currentTime = Math.floor(Date.now() / 1000);
 		if (decoded.exp < currentTime) {
-			return false;
+			return {userId: null, isValid: false};
 		}
 
-		return true;
+		return {userId: decoded.googleId, isValid: true};
 	} catch (error) {
-		return false;
+		return {userId: null, isValid: false};
 	}
 };
 
