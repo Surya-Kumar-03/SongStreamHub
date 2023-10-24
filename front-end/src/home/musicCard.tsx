@@ -6,6 +6,7 @@ import poster from '@/assets/poster.webp';
 import Image from '@/components/ui/image';
 import {Icon} from '@iconify/react';
 import PlayButton from '@/components/ui/platButton';
+import ArtistCard from '@/artist/artishCard';
 
 export function MusicCard() {
 	const [like, setLike] = React.useState(false);
@@ -42,7 +43,15 @@ export function MusicCard() {
 				<div className="flex justify-between w-full">
 					<div className="flex flex-col">
 						<div>Song Name</div>
-						<div className="text-sm text-muted-foreground">Artist Name</div>
+						<div className="text-sm text-muted-foreground">
+							<ArtistCard
+								name="Aryan Amish"
+								avatar_link=""
+								genere="hpi-hop"
+								song_title="New Song"
+								upload_date="21st sep, 2023"
+							/>
+						</div>
 					</div>
 					<div className="flex flex-col justify-center items-center gap-2">
 						<div onClick={likeSong} className="cursor-pointer w-5 h-5">
