@@ -1,5 +1,4 @@
 import Icon from '@/components/icon';
-import Theme from '@/components/ui/theme';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -20,11 +19,12 @@ import {
 } from '@/components/ui/menubar';
 import {MoonIcon, SunIcon} from '@radix-ui/react-icons';
 import {useTheme} from '../components/theme-provider';
-import React from 'react';
 import {Button} from '../components/ui/button';
 import SocialsLinks from './socials_link';
 import {TrashIcon} from '@radix-ui/react-icons';
 import {Link} from 'react-router-dom';
+import UploadSong from '@/uploadSong/uploadSong';
+import React from 'react';
 
 function ThemeChanger() {
 	const {setTheme} = useTheme();
@@ -53,11 +53,9 @@ export function NavBar() {
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 			<div className="w-full h-full p-5 flex justify-between">
-				<Theme>
-					<div className="w-10 h-10">
-						<Icon.logo className="text-white" />
-					</div>
-				</Theme>
+				<div className="w-10 h-10 fill-foreground">
+					<Icon.logo className="text-white" />
+				</div>
 				<ThemeChanger />
 			</div>
 		</header>
@@ -65,6 +63,9 @@ export function NavBar() {
 }
 
 export function Menu() {
+	const logout = () => {
+		// logout the user
+	};
 	return (
 		<>
 			<Menubar className="sticky top-0 z-50">
@@ -123,7 +124,17 @@ export function Menu() {
 								<Link to="/">
 									<MenubarItem inset>Add Account...</MenubarItem>
 								</Link>
+								<Link to="/">
+									<MenubarItem inset onClick={logout}>
+										Log out of all account
+									</MenubarItem>
+								</Link>
 							</MenubarContent>
+						</MenubarMenu>
+						<MenubarMenu>
+							<MenubarTrigger>
+								<UploadSong />
+							</MenubarTrigger>
 						</MenubarMenu>
 					</div>
 					<div>

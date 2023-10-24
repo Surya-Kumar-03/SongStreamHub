@@ -18,14 +18,14 @@ export default function Login() {
 			<Card className="w-[350px] flex flex-col items-center">
 				<CardHeader>
 					<CardTitle>
-						<Label className="text-2xl">Login to Songs Hub</Label>
+						<Label className="text-2xl">Login to Song Stream Hub</Label>
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<a href={import.meta.env.VITE_BASE_URL + '/auth/google'}>
 						<Button className="flex justify-between gap-5 shadow-lg rounded-full px-10">
 							<Icon icon="flat-color-icons:google" />
-							Sign In with Google
+							<b>Sign In with Google</b>
 						</Button>
 					</a>
 				</CardContent>
