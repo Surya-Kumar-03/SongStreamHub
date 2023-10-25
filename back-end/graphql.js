@@ -30,6 +30,15 @@ const typeDefs = `
     getUser(uid: String!): User 
     getSong(id: Int!): Song
   }
+
+  type Mutation {
+    updateUser(input: UserInput!): String
+  }
+
+  input UserInput {
+    username: String
+    profilePicture: String
+  }
 `;
 
 const resolvers = {
@@ -55,6 +64,40 @@ const resolvers = {
 			} catch (error) {
 				console.error('Error fetching user:', error);
 				throw new Error('An error occurred while fetching the user.');
+			}
+		},
+	},
+	Mutation: {
+		updateUser: async (_, args, context) => {
+			const {isValid, userId} = context;
+			if (!isValid) {
+				return 'Login required to perform updation.';
+			}
+
+			const {input} = args;
+			try {
+				const user = await User.findById(userId);
+				if (!user) {
+					return 'User not found.';
+				}
+
+				if (user._id != userId) {
+					return 'Unauthorised.';
+				}
+
+				if (input.username) {
+					user.name = input.username;
+				}
+				if (input.profilePicture) {
+					user.profilePicture = input.profilePicture;
+				}
+
+				await user.save();
+
+				return 'Updation successful.';
+			} catch (error) {
+				console.error('Error updating user:', error);
+				throw new Error('An error occurred while updating the user.');
 			}
 		},
 	},
