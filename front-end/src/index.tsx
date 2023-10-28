@@ -4,6 +4,7 @@ import Login from './login/Login';
 import {createBrowserRouter, RouterProvider} from 'react-router-dom';
 import {ApolloProvider} from '@apollo/client';
 import client from './graphqlConfig';
+import MusicPlayer from './player/musicPlayer';
 
 const router = createBrowserRouter([
 	{
@@ -29,9 +30,10 @@ const router = createBrowserRouter([
 export default function Index() {
 	return (
 		<ApolloProvider client={client}>
-			<div className="flex w-full h-full">
-				<div className="container">
+			<div className="flex w-full h-full justify-center items-center">
+				<div>
 					<RouterProvider router={router} />
+					<MusicPlayer />
 				</div>
 			</div>
 		</ApolloProvider>

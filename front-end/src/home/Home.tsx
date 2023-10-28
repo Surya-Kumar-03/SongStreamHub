@@ -16,7 +16,7 @@ export default function Home() {
 	}, []);
 
 	return (
-		<div className="p-10 flex flex-wrap gap-5">
+		<div className="p-10 flex flex-wrap gap-5 justify-center">
 			<MusicCard />
 			<MusicCard />
 			<MusicCard />

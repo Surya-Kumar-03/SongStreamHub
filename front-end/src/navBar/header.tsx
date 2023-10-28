@@ -90,7 +90,7 @@ export function Menu() {
 						</MenubarMenu>
 
 						<MenubarMenu>
-							<MenubarTrigger className="hidden md:block">Account</MenubarTrigger>
+							<MenubarTrigger className="">Account</MenubarTrigger>
 							<MenubarContent forceMount>
 								<MenubarLabel inset>Switch Account</MenubarLabel>
 								<MenubarSeparator />
