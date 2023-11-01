@@ -4,7 +4,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"start": "vite --port 3000",
+		"start": "vite --port 3000 --host",
 		"dev": "vite --port 3000",
 		"build": "tsc && vite build",
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@apollo/client": "^3.8.6",
+		"@preact/signals-react": "^1.3.6",
 		"@radix-ui/react-accessible-icon": "^1.0.3",
 		"@radix-ui/react-accordion": "^1.1.2",
 		"@radix-ui/react-alert-dialog": "^1.0.5",
@@ -27,7 +28,7 @@
 		"@radix-ui/react-label": "^2.0.2",
 		"@radix-ui/react-menubar": "^1.0.4",
 		"@radix-ui/react-navigation-menu": "^1.1.3",
-		"@radix-ui/react-popover": "^1.0.6",
+		"@radix-ui/react-popover": "^1.0.7",
 		"@radix-ui/react-progress": "^1.0.3",
 		"@radix-ui/react-radio-group": "^1.1.3",
 		"@radix-ui/react-scroll-area": "^1.0.5",

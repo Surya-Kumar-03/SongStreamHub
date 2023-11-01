@@ -17,7 +17,7 @@ import {
 	MenubarShortcut,
 	MenubarTrigger,
 } from '@/components/ui/menubar';
-import {MoonIcon, SunIcon} from '@radix-ui/react-icons';
+import {AvatarIcon, MoonIcon, SunIcon} from '@radix-ui/react-icons';
 import {useTheme} from '../components/theme-provider';
 import {Button} from '../components/ui/button';
 import SocialsLinks from './socials_link';
@@ -25,6 +25,8 @@ import {TrashIcon} from '@radix-ui/react-icons';
 import {Link} from 'react-router-dom';
 import UploadSong from '@/uploadSong/uploadSong';
 import React from 'react';
+import {Avatar, AvatarImage} from '@/components/ui/avatar';
+import {AvatarFallback} from '@radix-ui/react-avatar';
 
 function ThemeChanger() {
 	const {setTheme} = useTheme();
@@ -65,6 +67,12 @@ export function NavBar() {
 export function Menu() {
 	const logout = () => {
 		// logout the user
+		// dont clear the whole localstorage because some other cache are stored in local storage
+		// only remove the login details from the localstorage
+
+		localStorage.removeItem('jwtToken');
+		localStorage.removeItem('name');
+		localStorage.removeItem('email');
 	};
 	return (
 		<>
@@ -90,7 +98,21 @@ export function Menu() {
 						</MenubarMenu>
 
 						<MenubarMenu>
-							<MenubarTrigger className="">Account</MenubarTrigger>
+							<MenubarTrigger>
+								<UploadSong />
+							</MenubarTrigger>
+						</MenubarMenu>
+					</div>
+					<div className="flex gap-10 pr-4">
+						<MenubarMenu>
+							<MenubarTrigger className="h-full w-full">
+								<Avatar className="w-full h-full">
+									<AvatarImage src={''} />
+									<AvatarFallback>
+										<AvatarIcon className="w-full h-full" />
+									</AvatarFallback>
+								</Avatar>
+							</MenubarTrigger>
 							<MenubarContent forceMount>
 								<MenubarLabel inset>Switch Account</MenubarLabel>
 								<MenubarSeparator />
@@ -124,20 +146,13 @@ export function Menu() {
 								<Link to="/">
 									<MenubarItem inset>Add Account...</MenubarItem>
 								</Link>
-								<Link to="/">
+								<Link to="/" onClick={logout}>
 									<MenubarItem inset onClick={logout}>
 										Log out of all account
 									</MenubarItem>
 								</Link>
 							</MenubarContent>
 						</MenubarMenu>
-						<MenubarMenu>
-							<MenubarTrigger>
-								<UploadSong />
-							</MenubarTrigger>
-						</MenubarMenu>
-					</div>
-					<div>
 						<ThemeChanger />
 					</div>
 				</div>

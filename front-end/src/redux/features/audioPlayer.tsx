@@ -2,15 +2,25 @@ import {createSlice} from '@reduxjs/toolkit';
 function mod(n: number, m: number) {
 	return ((n % m) + m) % m;
 }
+
+export interface interfaceQueue {
+	song_name: string;
+	artist: string;
+	url: string;
+	poster: {
+		src: string;
+		size: string;
+		type: string;
+	}[];
+}
 export interface GlobalAudioPlayer {
 	visible: boolean;
 	playing: boolean;
 	songName: string;
 	currentSongPlayingPosition: number;
-	artist: string;
 	duration: number;
 	volume: number;
-	queue: string[];
+	queue: interfaceQueue[];
 	loopQueue: boolean;
 	loopSong: boolean;
 	currentPlayingIndex: number;
@@ -20,10 +30,46 @@ const initialState: GlobalAudioPlayer = {
 	visible: true,
 	playing: false,
 	songName: '',
-	artist: '',
 	duration: 1, // in seconds
 	volume: 0.7,
-	queue: ['/sample_audio.mp3', '/song1.m4a', '/song2.m4a'],
+	queue: [
+		{
+			song_name: 'Siya Ram',
+			artist: 'Unknown',
+			url: '/sample_audio.mp3',
+			poster: [
+				{
+					src: 'https://dummyimage.com/96x96',
+					size: '96x96',
+					type: 'image/png',
+				},
+			],
+		},
+		{
+			song_name: 'Tu Mera hoke',
+			artist: 'Arijit Singh',
+			url: '/song1.m4a',
+			poster: [
+				{
+					src: 'https://dummyimage.com/96x96',
+					size: '96x96',
+					type: 'image/png',
+				},
+			],
+		},
+		{
+			song_name: 'Dheere Dheere',
+			artist: 'Yo Yo Honey Singh',
+			url: '/song2.m4a',
+			poster: [
+				{
+					src: 'https://dummyimage.com/96x96',
+					size: '96x96',
+					type: 'image/png',
+				},
+			],
+		},
+	],
 	currentPlayingIndex: 0,
 	loopQueue: true,
 	loopSong: false,
@@ -45,9 +91,6 @@ export const Player = createSlice({
 		},
 		songName: (state, action) => {
 			state.songName = action.payload;
-		},
-		artist: (state, action) => {
-			state.artist = action.payload;
 		},
 		duration: (state, action) => {
 			state.duration = action.payload;
@@ -120,7 +163,7 @@ export const Player = createSlice({
 		},
 		shuffle: (state) => {
 			function shuffleArrayInRange(
-				array: string[],
+				array: interfaceQueue[],
 				startIndex: number,
 				endIndex: number
 			) {
@@ -154,7 +197,6 @@ const AudioPlayer = {
 	show: Player.actions.show,
 	hide: Player.actions.hide,
 	songName: Player.actions.songName,
-	artist: Player.actions.artist,
 	duration: Player.actions.duration,
 	seek: Player.actions.seek,
 	play: Player.actions.play,

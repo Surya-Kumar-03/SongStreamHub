@@ -6,59 +6,156 @@ import ReactPlayer from 'react-player';
 import {useSelector, useDispatch} from 'react-redux';
 import AudioPlayer from '@/redux/features/audioPlayer';
 import type {RootState} from '@/redux/store';
-
+import PlayerSignals from './signals';
 const secondsToMinutes = (seconds: number) => {
 	const minutes = Math.floor(seconds / 60);
 	const new_seconds = Math.floor(seconds - minutes * 60);
-	return `${minutes}:${new_seconds}`;
+	return `${String(minutes).padStart(2, '0')}:${String(new_seconds).padStart(
+		2,
+		'0'
+	)}`;
 };
 
+let seeking = false;
 export default function MusicPlayer() {
 	const Player = React.useRef<ReactPlayer | null>(null);
+	const trackSlider = React.useRef<HTMLSpanElement>(null);
 	const reduxAudioPlayer = useSelector((state: RootState) => state.AudioPlayer);
+	const volumeSlider = React.useRef<HTMLSpanElement>(null);
 	const dispatch = useDispatch();
-	const [seeking, setSeeking] = React.useState(false);
 	const handleProgress = (changeState: {
 		loaded: number;
 		playedSeconds: number;
 		loadedSeconds: number;
 		played: number;
 	}) => {
-		if (reduxAudioPlayer.playing && seeking === false) {
+		if (PlayerSignals.playing && seeking === false) {
+			PlayerSignals.currentSongPlayingPosition = changeState.playedSeconds;
 			dispatch(AudioPlayer.currentSongPlayingPosition(changeState.playedSeconds));
 		}
 		if (Player.current?.getDuration() !== reduxAudioPlayer.duration) {
+			PlayerSignals.duration = Player.current?.getDuration() || 0;
 			dispatch(AudioPlayer.duration(Player.current?.getDuration()));
 		}
 	};
 	const handleDuration = (duration: number) => {
+		PlayerSignals.duration = duration;
 		dispatch(AudioPlayer.duration(duration));
 	};
 	const handleSongEnded = () => {
+		PlayerSignals.next();
 		dispatch(AudioPlayer.next());
 	};
 	const handleSeek = (data: number[]) => {
-		setSeeking(true);
-		dispatch(AudioPlayer.seek(data[0]));
-		Player.current?.seekTo(reduxAudioPlayer.currentSongPlayingPosition);
-		setSeeking(false);
-		console.log(data);
+		seeking = true;
+		let seekTo = data[0];
+		if (seekTo < 0) {
+			seekTo = 0;
+		} else if (seekTo > reduxAudioPlayer.duration) {
+			seekTo = reduxAudioPlayer.duration;
+		}
+		dispatch(AudioPlayer.seek(seekTo));
+		Player.current?.seekTo(seekTo);
+		seeking = false;
 	};
 	const handleVolumeSeek = (data: number[]) => {
-		dispatch(AudioPlayer.volume(data[0] / 100));
+		let vol = data[0];
+		if (vol < 0) {
+			vol = 0;
+		} else if (vol > 100) {
+			vol = 100;
+		}
+		dispatch(AudioPlayer.volume(vol / 100));
 	};
+
+	const currentSong = () => {
+		return reduxAudioPlayer.queue[reduxAudioPlayer.currentPlayingIndex];
+	};
+
+	React.useEffect(() => {
+		if ('mediaSession' in navigator) {
+			navigator.mediaSession.metadata = new MediaMetadata({
+				title: currentSong().song_name,
+				artist: currentSong().artist || 'unknown',
+				artwork: currentSong().poster,
+			});
+
+			navigator.mediaSession.setActionHandler('play', () => {
+				dispatch(AudioPlayer.play());
+			});
+			navigator.mediaSession.setActionHandler('pause', () => {
+				dispatch(AudioPlayer.pause());
+			});
+			navigator.mediaSession.setActionHandler('stop', () => {
+				dispatch(AudioPlayer.pause());
+				dispatch(AudioPlayer.currentSongPlayingPosition(0));
+			});
+			navigator.mediaSession.setActionHandler('previoustrack', () => {
+				dispatch(AudioPlayer.prev());
+			});
+			navigator.mediaSession.setActionHandler('nexttrack', () => {
+				dispatch(AudioPlayer.next());
+			});
+			navigator.mediaSession.setActionHandler('seekto', (e) => {
+				if (e.seekTime) {
+					handleSeek([e.seekTime]);
+				}
+			});
+			navigator.mediaSession.setActionHandler('seekbackward', (e) => {
+				if (e.seekTime) {
+					handleSeek([e.seekTime]);
+				}
+			});
+			navigator.mediaSession.setActionHandler('seekforward', (e) => {
+				if (e.seekTime) {
+					handleSeek([e.seekTime]);
+				}
+			});
+		}
+	}, [reduxAudioPlayer.currentPlayingIndex]);
+
 	React.useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (!reduxAudioPlayer.visible) {
 				return;
 			}
-			if (event.key === ' ') {
+			if (
+				!(
+					event.key === ' ' ||
+					event.key === 'ArrowUp' ||
+					event.key === 'ArrowDown' ||
+					event.key === 'ArrowLeft' ||
+					event.key === 'ArrowRight'
+				)
+			) {
+				return;
+			}
+			const old_vol = parseFloat(
+				parseFloat(volumeSlider.current?.getAttribute('data-volume') || '0').toFixed(
+					2
+				)
+			);
+			const currentSongPos = parseFloat(
+				trackSlider.current?.getAttribute('data-current-position') || '0'
+			);
+			if (
+				event.key === ' ' &&
+				!(document.activeElement instanceof HTMLInputElement)
+			) {
 				event.preventDefault();
 				dispatch(AudioPlayer.togglePlayPause());
 			} else if (event.key === 'ArrowUp') {
 				event.preventDefault();
+				handleVolumeSeek([old_vol + 2]);
 			} else if (event.key === 'ArrowDown') {
 				event.preventDefault();
+				handleVolumeSeek([old_vol - 2]);
+			} else if (event.key === 'ArrowLeft') {
+				event.preventDefault();
+				handleSeek([currentSongPos - 5]);
+			} else if (event.key === 'ArrowRight') {
+				event.preventDefault();
+				handleSeek([currentSongPos + 5]);
 			}
 		};
 		window.addEventListener('keydown', handleKeyDown);
@@ -95,13 +192,15 @@ export default function MusicPlayer() {
 					<div className="flex gap-5  w-full">
 						<div>
 							<Avatar className=" rounded-sm p-1 w-16 h-16">
-								<AvatarImage src={''} className="rounded-sm"></AvatarImage>
+								<AvatarImage
+									src={currentSong().poster[0].src}
+									className="rounded-sm"></AvatarImage>
 								<AvatarFallback className="rounded-sm">{initials}</AvatarFallback>
 							</Avatar>
 						</div>
 						<div className="flex flex-col">
-							<div>Song Name</div>
-							<div>Artist Name</div>
+							<div>{currentSong().song_name}</div>
+							<div>{currentSong().artist}</div>
 						</div>
 						<div className="h-full flex justify-center items-center pb-3">
 							<div
@@ -179,11 +278,13 @@ export default function MusicPlayer() {
 							</div>
 						</div>
 						<div className="flex w-full h-full items-center justify-center gap-3">
-							<div>
+							<div className="w-14">
 								{secondsToMinutes(reduxAudioPlayer.currentSongPlayingPosition)}
 							</div>
 							<div className="w-full">
 								<Slider
+									data-current-position={reduxAudioPlayer.currentSongPlayingPosition}
+									ref={trackSlider}
 									defaultValue={[0]}
 									max={reduxAudioPlayer.duration}
 									step={1}
@@ -192,7 +293,9 @@ export default function MusicPlayer() {
 									value={[reduxAudioPlayer.currentSongPlayingPosition]}
 								/>
 							</div>
-							<div>{secondsToMinutes(reduxAudioPlayer.duration)}</div>
+							<div className="w-14">
+								{secondsToMinutes(reduxAudioPlayer.duration)}
+							</div>
 						</div>
 					</div>
 					<div className="w-full">
@@ -223,6 +326,8 @@ export default function MusicPlayer() {
 								</div>
 								<div className="w-full">
 									<Slider
+										data-volume={reduxAudioPlayer.volume * 100}
+										ref={volumeSlider}
 										onValueChange={(vol: number[]) => {
 											if (vol[0] !== 0) {
 												document
@@ -248,19 +353,20 @@ export default function MusicPlayer() {
 						ref={Player}
 						url={(() => {
 							if (reduxAudioPlayer.currentPlayingIndex !== -1) {
-								return reduxAudioPlayer.queue[reduxAudioPlayer.currentPlayingIndex];
+								return reduxAudioPlayer.queue[reduxAudioPlayer.currentPlayingIndex]
+									.url;
 							}
 							return '';
 						})()}
 						onEnded={handleSongEnded}
 						loop={reduxAudioPlayer.loopSong}
-						height={'40px'}
 						playing={reduxAudioPlayer.playing}
 						onProgress={handleProgress}
 						onDuration={handleDuration}
 						volume={reduxAudioPlayer.volume}
 						muted={reduxAudioPlayer.volume === 0}
 					/>
+					T
 				</div>
 			</div>
 		</>
