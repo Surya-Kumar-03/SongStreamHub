@@ -67,11 +67,15 @@ async function startServer() {
 							return {
 								userId: userId,
 								isValid: isValid,
+								req: req,
+								res: res,
 							};
 						} else {
 							return {
 								userId: null,
 								isValid: false,
+								req: req,
+								res: res,
 							};
 						}
 					},

@@ -43,13 +43,14 @@ const typeDefs = `
 
 const resolvers = {
 	Query: {
-		getUser: async (_, args) => {
+		getUser: async (_, args, context) => {
 			const {uid} = args;
+			const {res} = context;
 			try {
 				const user = await User.findById(uid);
 
 				if (!user) {
-					return {error: 'User not found.'};
+					return res.status(404).json({error: 'User not found.'});
 				}
 
 				const graphqlUser = {
@@ -69,20 +70,20 @@ const resolvers = {
 	},
 	Mutation: {
 		updateUser: async (_, args, context) => {
-			const {isValid, userId} = context;
+			const {isValid, userId, req, res} = context;
 			if (!isValid) {
-				return 'Login required to perform updation.';
+				return res.status(401).json({error: 'Login required to perform updation.'});
 			}
 
 			const {input} = args;
 			try {
 				const user = await User.findById(userId);
 				if (!user) {
-					return 'User not found.';
+					return res.status(404).json({error: 'User not found.'});
 				}
 
 				if (user._id != userId) {
-					return 'Unauthorised.';
+					return res.status(401).json({error: 'Unauthorised.'});
 				}
 
 				if (input.username) {
@@ -93,7 +94,6 @@ const resolvers = {
 				}
 
 				await user.save();
-
 				return 'Updation successful.';
 			} catch (error) {
 				console.error('Error updating user:', error);
