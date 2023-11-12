@@ -1,6 +1,7 @@
 // Model Imports
 const User = require('./models/userModel');
 const Song = require('./models/songModel');
+const Artist = require('./models/artistModel');
 
 // GraphQL
 const typeDefs = `
@@ -141,10 +142,15 @@ const resolvers = {
 				}
 
 				let artistIdFinal;
-				if (artistId !== null) {
+				if (artistId !== null && artistId !== undefined) {
 					artistIdFinal = artistId;
 				} else {
-					//Create new artist and assign artistIdFinal to him
+					const newArtistObject = new Artist({
+						name: newArtist,
+					});
+
+					const createdArtist = await newArtistObject.save();
+					artistIdFinal = createdArtist._id;
 				}
 
 				const song = new Song({
@@ -161,6 +167,23 @@ const resolvers = {
 				});
 
 				await song.save();
+
+				const songId = song._id.toString();
+				try {
+					const artist = await Artist.findById(artistIdFinal);
+
+					const isSongAlreadyPresent = artist.songs.some((song) =>
+						song.equals(songId)
+					);
+
+					if (!isSongAlreadyPresent) {
+						artist.songs.push(songId);
+						await artist.save();
+					}
+				} catch (error) {
+					console.error('Error adding song to artist:', error);
+					res.status(500).json({error: 'Error adding song to artist'});
+				}
 
 				return 'Song uploaded successfully.';
 			} catch (error) {
