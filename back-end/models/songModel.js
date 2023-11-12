@@ -1,23 +1,19 @@
 const mongoose = require('mongoose');
 
 const songSchema = new mongoose.Schema({
-	id: {
-		type: Number,
-		required: true,
-	},
 	name: {
 		type: String,
 		required: true,
 	},
-	artist: {
+	artistId: {
+		type: String,
+		required: true,
+	},
+	ownerId: {
 		type: String,
 		required: true,
 	},
 	mediaUrl: {
-		type: String,
-		required: true,
-	},
-	album: {
 		type: String,
 		required: true,
 	},
@@ -41,10 +37,6 @@ const songSchema = new mongoose.Schema({
 	},
 	genre: {
 		type: String,
-	},
-	owner: {
-		type: String,
-		required: true,
 	},
 });
 

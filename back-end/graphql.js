@@ -1,5 +1,6 @@
 // Model Imports
 const User = require('./models/userModel');
+const Song = require('./models/songModel');
 
 // GraphQL
 const typeDefs = `
@@ -15,9 +16,9 @@ const typeDefs = `
   type Song {
     id: Int!
     name: String!
-    artist: String!
+    artistId: String!
+	ownerId: String!
     mediaUrl: String!
-    album: String!
     thumbnail: String!
     duration: Int!
     date: Date
@@ -33,6 +34,17 @@ const typeDefs = `
 
   type Mutation {
     updateUser(input: UserInput!): String
+	uploadSong(input: SongInput!): String
+  }
+
+  input SongInput {
+	title: String!
+	artistId: String
+	newArtist: String
+	songLink: String!
+	coverPhotoLink: String!
+	duration: Int!
+	genre: String!
   }
 
   input UserInput {
@@ -70,7 +82,7 @@ const resolvers = {
 	},
 	Mutation: {
 		updateUser: async (_, args, context) => {
-			const {isValid, userId, req, res} = context;
+			const {isValid, userId, res} = context;
 			if (!isValid) {
 				return res.status(401).json({error: 'Login required to perform updation.'});
 			}
@@ -98,6 +110,64 @@ const resolvers = {
 			} catch (error) {
 				console.error('Error updating user:', error);
 				throw new Error('An error occurred while updating the user.');
+			}
+		},
+		uploadSong: async (_, args, context) => {
+			const {isValid, userId, res} = context;
+			if (!isValid) {
+				return res.status(401).json({error: 'Login is required to upload songs.'});
+			}
+
+			const {input} = args;
+
+			try {
+				const {
+					title,
+					artistId,
+					newArtist,
+					songLink,
+					coverPhotoLink,
+					duration,
+					genre,
+				} = input;
+
+				if (
+					(artistId === undefined || artistId === null) &&
+					(newArtist === undefined || newArtist === null)
+				) {
+					return res.status(400).json({
+						error: 'Provide either an existing artist or a new artist (only one).',
+					});
+				}
+
+				let artistIdFinal;
+				if (artistId !== null) {
+					artistIdFinal = artistId;
+				} else {
+					//Create new artist and assign artistIdFinal to him
+				}
+
+				const song = new Song({
+					name: title,
+					artistId: artistIdFinal,
+					ownerId: userId,
+					mediaUrl: songLink,
+					thumbnail: coverPhotoLink,
+					duration: duration,
+					date: new Date(),
+					clicks: 0,
+					likes: 0,
+					genre,
+				});
+
+				await song.save();
+
+				return 'Song uploaded successfully.';
+			} catch (error) {
+				console.error('Error uploading song:', error);
+				return res
+					.status(500)
+					.json({error: 'An error occurred while uploading the song.'});
 			}
 		},
 	},
