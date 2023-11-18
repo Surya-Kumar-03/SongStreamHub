@@ -13,6 +13,15 @@ const typeDefs = `
     likedSongs: [String]
   }
 
+  type Artist {
+	id: String!
+	name: String!
+	bio: String!
+	genres: String!
+	followers: Int!
+	songs: [Song]
+  }
+
   scalar Date
   type Song {
     id: Int!
@@ -30,7 +39,8 @@ const typeDefs = `
 
   type Query {
     getUser(uid: String!): User 
-    getSong(id: Int!): Song
+    getSong(id: String!): Song
+	getArtists: [Artist]
   }
 
   type Mutation {
@@ -78,6 +88,66 @@ const resolvers = {
 			} catch (error) {
 				console.error('Error fetching user:', error);
 				throw new Error('An error occurred while fetching the user.');
+			}
+		},
+		getArtists: async () => {
+			try {
+				const artists = await Artist.find().populate('songs');
+
+				const graphqlArtists = artists.map((artist) => ({
+					id: artist._id,
+					name: artist.name,
+					bio: artist.bio,
+					genres: artist.genres,
+					followers: artist.followers,
+					songs: artist.songs.map((song) => ({
+						id: song._id,
+						name: song.name,
+						artistId: song.artistId,
+						ownerId: song.ownerId,
+						mediaUrl: song.mediaUrl,
+						thumbnail: song.thumbnail,
+						duration: song.duration,
+						date: song.date,
+						clicks: song.clicks,
+						likes: song.likes,
+						genre: song.genre,
+					})),
+				}));
+
+				return graphqlArtists;
+			} catch (error) {
+				console.error('Error fetching artists:', error);
+				throw new Error('An error occurred while fetching artists.');
+			}
+		},
+		getSong: async (_, args, context) => {
+			try {
+				const {id} = args;
+				console.log('Id is', id);
+				const res = context;
+				const song = await Song.findById(id);
+
+				if (!song) {
+					return res.status(404).json({error: 'Song not found.'});
+				}
+
+				return {
+					id: song._id,
+					name: song.name,
+					artistId: song.artistId,
+					ownerId: song.ownerId,
+					mediaUrl: song.mediaUrl,
+					thumbnail: song.thumbnail,
+					duration: song.duration,
+					date: song.date.toISOString(),
+					clicks: song.clicks || 0,
+					likes: song.likes || 0,
+					genre: song.genre || '',
+				};
+			} catch (error) {
+				console.error('Error fetching song:', error);
+				throw new Error('An error occurred while fetching the song.');
 			}
 		},
 	},
