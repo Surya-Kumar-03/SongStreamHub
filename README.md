@@ -1,4 +1,4 @@
-# SongStreamHub - Full Stack Music Player Repository
+# SongStreamHub - Full Stack Music Player 
 
 SongStreamHub is a comprehensive music player application that leverages a range of technologies to provide a seamless music streaming experience. This repository showcases the development of a music player app utilizing Node.js, GraphQL, Firebase Storage, and MongoDB for efficient data storage and retrieval. The implementation includes robust security measures with OAuth for secure authorization and JWT for user authentication, enhancing the overall user experience.
 
