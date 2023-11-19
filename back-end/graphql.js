@@ -17,14 +17,14 @@ const typeDefs = `
 	id: String!
 	name: String!
 	bio: String!
-	genres: String!
+	genres: [String]!
 	followers: Int!
 	songs: [Song]
   }
 
   scalar Date
   type Song {
-    id: Int!
+    id: String!
     name: String!
     artistId: String!
 	ownerId: String!
@@ -41,6 +41,8 @@ const typeDefs = `
     getUser(uid: String!): User 
     getSong(id: String!): Song
 	getArtists: [Artist]
+	getArtist(id: String!): Artist
+	getArtistGenres(id: String!): [String]
   }
 
   type Mutation {
@@ -124,8 +126,7 @@ const resolvers = {
 		getSong: async (_, args, context) => {
 			try {
 				const {id} = args;
-				console.log('Id is', id);
-				const res = context;
+				const {res} = context;
 				const song = await Song.findById(id);
 
 				if (!song) {
@@ -148,6 +149,57 @@ const resolvers = {
 			} catch (error) {
 				console.error('Error fetching song:', error);
 				throw new Error('An error occurred while fetching the song.');
+			}
+		},
+		getArtist: async (_, args, context) => {
+			try {
+				const {id} = args;
+				const {res} = context;
+				const artist = await Artist.findById(id).populate('songs');
+
+				if (!artist) {
+					return res.status(404).json({error: 'Artist not found.'});
+				}
+
+				return {
+					id: artist._id,
+					name: artist.name,
+					bio: artist.bio,
+					genres: artist.genres,
+					followers: artist.followers,
+					songs: artist.songs.map((song) => ({
+						id: song._id,
+						name: song.name,
+						artistId: song.artistId,
+						ownerId: song.ownerId,
+						mediaUrl: song.mediaUrl,
+						thumbnail: song.thumbnail,
+						duration: song.duration,
+						date: song.date.toISOString(),
+						clicks: song.clicks || 0,
+						likes: song.likes || 0,
+						genre: song.genre || '',
+					})),
+				};
+			} catch (error) {
+				console.error('Error fetching artist:', error);
+				throw new Error('An error occurred while fetching the artist.');
+			}
+		},
+		getArtistGenres: async (_, args, context) => {
+			try {
+				const {id} = args;
+				const {res} = context;
+				const artist = await Artist.findById(id);
+
+				if (!artist) {
+					return res.status(404).json({error: 'Artist not found.'});
+				}
+
+				return artist.genres || [];
+			} catch (error) {
+				console.error('Error fetching artist genres:', error);
+				throw new Error('An error occurred while fetching artist genres.');
 			}
 		},
 	},
@@ -248,6 +300,10 @@ const resolvers = {
 
 					if (!isSongAlreadyPresent) {
 						artist.songs.push(songId);
+
+						if (!artist.genres.includes(genre)) {
+							artist.genres.push(genre);
+						}
 						await artist.save();
 					}
 				} catch (error) {
