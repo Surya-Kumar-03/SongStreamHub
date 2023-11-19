@@ -43,6 +43,7 @@ const typeDefs = `
 	getArtists: [Artist]
 	getArtist(id: String!): Artist
 	getArtistGenres(id: String!): [String]
+	getAllSongs: [Song]
   }
 
   type Mutation {
@@ -200,6 +201,28 @@ const resolvers = {
 			} catch (error) {
 				console.error('Error fetching artist genres:', error);
 				throw new Error('An error occurred while fetching artist genres.');
+			}
+		},
+		getAllSongs: async () => {
+			try {
+				const songs = await Song.find();
+
+				return songs.map((song) => ({
+					id: song._id,
+					name: song.name,
+					artistId: song.artistId,
+					ownerId: song.ownerId,
+					mediaUrl: song.mediaUrl,
+					thumbnail: song.thumbnail,
+					duration: song.duration,
+					date: song.date.toISOString(),
+					clicks: song.clicks || 0,
+					likes: song.likes || 0,
+					genre: song.genre || '',
+				}));
+			} catch (error) {
+				console.error('Error fetching all songs:', error);
+				throw new Error('An error occurred while fetching all songs.');
 			}
 		},
 	},
